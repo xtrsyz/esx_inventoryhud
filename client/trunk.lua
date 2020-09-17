@@ -22,8 +22,11 @@ function setTrunkInventoryData(data, blackMoney, inventory, weapons)
 
     SendNUIMessage(
         {
-            action = "setInfoText",
-            text = data.text
+            action = "setInfoOther",
+            label = data.text,
+            id = data.plate,
+            max = data.max,
+            used = data.weight,
         }
     )
 
@@ -38,6 +41,7 @@ function setTrunkInventoryData(data, blackMoney, inventory, weapons)
             usable = false,
             rare = false,
             limit = -1,
+            weight = 0,
             canRemove = false
         }
         table.insert(items, accountData)
@@ -90,15 +94,17 @@ end
 function openTrunkInventory()
     loadPlayerInventory()
     isInInventory = true
+    local playerPed = GetPlayerPed(-1)
+    if not IsEntityPlayingAnim(playerPed, 'mini@repair', 'fixing_a_player', 3) then
+        ESX.Streaming.RequestAnimDict('mini@repair', function()
+            TaskPlayAnim(playerPed, 'mini@repair', 'fixing_a_player', 8.0, -8, -1, 49, 0, 0, 0, 0)
+        end)
+    end
 
-    SendNUIMessage(
-        {
-            action = "display",
-            type = "trunk"
-        }
-    )
+    SendNUIMessage({action = "display", type = "trunk"})
 
     SetNuiFocus(true, true)
+    ESX.UI.Menu.CloseAll()
 end
 
 RegisterNUICallback(

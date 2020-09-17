@@ -13,12 +13,24 @@ ESX.RegisterServerCallback(
 		local targetXPlayer = ESX.GetPlayerFromId(target)
 
 		if targetXPlayer ~= nil then
-			cb({inventory = targetXPlayer.inventory, money = targetXPlayer.getMoney(), accounts = targetXPlayer.accounts, weapons = targetXPlayer.loadout})
+			cb({
+				inventory = targetXPlayer.inventory, 
+				money = targetXPlayer.getMoney(), 
+				accounts = targetXPlayer.accounts, 
+				weapons = targetXPlayer.loadout, 
+				weight = targetXPlayer.getWeight(), 
+				maxWeight = targetXPlayer.maxWeight
+			})
 		else
 			cb(nil)
 		end
 	end
 )
+
+RegisterServerEvent("esx_inventoryhud:changeFastItem")
+AddEventHandler("esx_inventoryhud:changeFastItem", function ( fastSlot )
+	-- body
+end)
 
 RegisterServerEvent("esx_inventoryhud:tradePlayerItem")
 AddEventHandler(
@@ -100,41 +112,16 @@ AddEventHandler(
 
 			if amount > 0 then
 				if playerItem.limit ~= -1 and (playerItem.count + amount) > playerItem.limit then
-					TriggerClientEvent(
-						"pNotify:SendNotification",
-						_source,
-						{
-							text = "Tolik se toho k tobě nevejde!",
-							type = "error",
-							timeout = 3000
-						}
-					)
+					TriggerClientEvent('esx:showNotification', _source, _U("not_enough_space"))
 				else
 					local price = amount * item.price
 
 					if xPlayer.getMoney() >= price then
 						xPlayer.removeMoney(price)
 						xPlayer.addInventoryItem(item.name, amount)
-
-						TriggerClientEvent(
-							"pNotify:SendNotification",
-							_source,
-							{
-								text = "Zakoupil jsi " .. amount .. "x " .. item.label .. " za $" .. item.price,
-								type = "success",
-								timeout = 3000
-							}
-						)
+						TriggerClientEvent('esx:showNotification', _source, _U("bought", amount, item.label, item.price))
 					else
-						TriggerClientEvent(
-							"pNotify:SendNotification",
-							_source,
-							{
-								text = "Nemáš dostatek peněz!",
-								type = "error",
-								timeout = 3000
-							}
-						)
+						TriggerClientEvent('esx:showNotification', _source, _U("not_enough_money"))
 					end
 				end
 			end
@@ -143,37 +130,12 @@ AddEventHandler(
 				if not xPlayer.hasWeapon(item.name) then
 					xPlayer.removeMoney(item.price)
 					xPlayer.addWeapon(item.name, item.ammo)
-
-					TriggerClientEvent(
-						"pNotify:SendNotification",
-						_source,
-						{
-							text = "Zakoupil jsi " .. item.label .. " za $" .. item.price,
-							type = "success",
-							timeout = 3000
-						}
-					)
+					TriggerClientEvent('esx:showNotification', _source, _U("bought", 1, item.label, item.price))
 				else
-					TriggerClientEvent(
-						"pNotify:SendNotification",
-						_source,
-						{
-							text = "Tuto zbraň již vlastníš!",
-							type = "error",
-							timeout = 3000
-						}
-					)
+					TriggerClientEvent('esx:showNotification', _source, _U('already_have_weapon'))
 				end
 			else
-				TriggerClientEvent(
-					"pNotify:SendNotification",
-					_source,
-					{
-						text = "Nemáš dostatek peněz!",
-						type = "error",
-						timeout = 3000
-					}
-				)
+				TriggerClientEvent('esx:showNotification', _source, _U('not_enough_money'))
 			end
 		end
 	end

@@ -1,9 +1,8 @@
-# esx_inventoryhud 2.3.0
+# esx_inventoryhud 2.5.0
 Inventory HUD for ESX. You can open and close inventory using F2. Part of code was taken from [es_extended](https://github.com/ESX-Org/es_extended).
 
 ## Requirements
-* [es_extended](https://github.com/esx-framework/es_extended/tree/v1-final) - version v1
-* [pNotify](https://forum.fivem.net/t/release-pnotify-in-game-js-notifications-using-noty/20659)
+* [extendedmode](https://github.com/extendedmode/extendedmode)
 
 ## Features
 - Drag and drop
@@ -20,10 +19,10 @@ Inventory HUD for ESX. You can open and close inventory using F2. Part of code w
 - Locale files included (check locales/ and html/locales/ directories)
 
 ## Addons
-* [Vehicle trunk inventory](https://github.com/Trsak/esx_inventoryhud_trunk/tree/master)
+* [Vehicle trunk inventory](https://github.com/xtrsyz/esx_inventoryhud_trunk/tree/master)
 
 ## Screens
-![Inventory screen](https://i.imgur.com/eHD01Tl.png)
+![Inventory screen](https://1.bp.blogspot.com/-bQrvQxgZ6bs/X1yBw0reJbI/AAAAAAAABtI/AUzIuxL1XoUacIL7kP9sLriNuKd9wjDpgCLcBGAsYHQ/s1601/esx_inventoryhud_trunk.jpg)
 
 ## Commands
 * **/openinventory <player_id>** - opens given player inventory (`inventory.openinventory` permission)
@@ -33,15 +32,15 @@ Inventory HUD for ESX. You can open and close inventory using F2. Part of code w
 ### Using Git
 ```
 cd resources
-git clone https://github.com/Trsak/esx_inventoryhud [esx]/esx_inventoryhud
+git clone https://github.com/xtrsyz/esx_inventoryhud [esx]/esx_inventoryhud
 ```
 
 ### Manually
-- Download https://github.com/Trsak/esx_inventoryhud/archive/master.zip
+- Download https://github.com/xtrsyz/esx_inventoryhud/archive/master.zip
 - Put it in the `[esx]` directory
 
 ## Installation
-Check [wiki page](https://github.com/Trsak/esx_inventoryhud/wiki)
+Check [wiki page](https://github.com/xtrsyz/esx_inventoryhud/wiki)
 
 ## Config files
 * config.lua

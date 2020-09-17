@@ -1,24 +1,34 @@
-RegisterNetEvent("esx_inventoryhud:openPropertyInventory")
+RegisterNetEvent("esx_inventoryhud:openMotelsInventory")
 AddEventHandler(
-    "esx_inventoryhud:openPropertyInventory",
+    "esx_inventoryhud:openMotelsInventory",
     function(data)
-        setPropertyInventoryData(data)
-        openPropertyInventory()
+        setPropertyMotelData(data)
+        openMotelInventory()
     end
 )
 
-function refreshPropertyInventory()
+function refreshPropertyMotelInventory()
     ESX.TriggerServerCallback(
-        "esx_property:getPropertyInventory",
+        "lsrp-motels:getPropertyInventory",
         function(inventory)
-            setPropertyInventoryData(inventory)
+            setPropertyMotelData(inventory)
         end,
         ESX.GetPlayerData().identifier
     )
 end
 
-function setPropertyInventoryData(data)
+function setPropertyMotelData(data)
     items = {}
+
+    SendNUIMessage(
+        {
+            action = "setInfoOther",
+            label = "Motel Inventory",
+            id = '',
+            max = '~',
+            used = '~',
+        }
+    )
 
     local blackMoney = data.blackMoney
     local propertyItems = data.items
@@ -32,7 +42,7 @@ function setPropertyInventoryData(data)
             name = "black_money",
             usable = false,
             rare = false,
-            limit = -1,
+            weight = -1,
             canRemove = false
         }
         table.insert(items, accountData)
@@ -45,7 +55,7 @@ function setPropertyInventoryData(data)
             item.type = "item_standard"
             item.usable = false
             item.rare = false
-            item.limit = -1
+            item.weight = -1
             item.canRemove = false
 
             table.insert(items, item)
@@ -61,7 +71,7 @@ function setPropertyInventoryData(data)
                 {
                     label = ESX.GetWeaponLabel(weapon.name),
                     count = weapon.ammo,
-                    limit = -1,
+                    weight = -1,
                     type = "item_weapon",
                     name = weapon.name,
                     usable = false,
@@ -74,30 +84,20 @@ function setPropertyInventoryData(data)
 
     SendNUIMessage(
         {
-            action = "setInfoOther",
-            label = 'Property Inventory',
-            id = '',
-            max = '~',
-            used = '~',
-        }
-    )
-
-    SendNUIMessage(
-        {
             action = "setSecondInventoryItems",
             itemList = items
         }
     )
 end
 
-function openPropertyInventory()
+function openMotelInventory()
     loadPlayerInventory()
     isInInventory = true
 
     SendNUIMessage(
         {
             action = "display",
-            type = "property"
+            type = "motels"
         }
     )
 
@@ -105,7 +105,7 @@ function openPropertyInventory()
 end
 
 RegisterNUICallback(
-    "PutIntoProperty",
+    "PutIntoMotel",
     function(data, cb)
         if IsPedSittingInAnyVehicle(playerPed) then
             return
@@ -118,11 +118,11 @@ RegisterNUICallback(
                 count = GetAmmoInPedWeapon(PlayerPedId(), GetHashKey(data.item.name))
             end
 
-            TriggerServerEvent("esx_property:putItem", ESX.GetPlayerData().identifier, data.item.type, data.item.name, count)
+            TriggerServerEvent("lsrp-motels:putItem", ESX.GetPlayerData().identifier, data.item.type, data.item.name, count)
         end
 
         Wait(150)
-        refreshPropertyInventory()
+        refreshPropertyMotelInventory()
         Wait(150)
         loadPlayerInventory()
 
@@ -131,18 +131,18 @@ RegisterNUICallback(
 )
 
 RegisterNUICallback(
-    "TakeFromProperty",
+    "TakeFromMotel",
     function(data, cb)
         if IsPedSittingInAnyVehicle(playerPed) then
             return
         end
 
         if type(data.number) == "number" and math.floor(data.number) == data.number then
-            TriggerServerEvent("esx_property:getItem", ESX.GetPlayerData().identifier, data.item.type, data.item.name, tonumber(data.number))
+            TriggerServerEvent("lsrp-motels:getItem", ESX.GetPlayerData().identifier, data.item.type, data.item.name, tonumber(data.number))
         end
 
         Wait(150)
-        refreshPropertyInventory()
+        refreshPropertyMotelInventory()
         Wait(150)
         loadPlayerInventory()
 

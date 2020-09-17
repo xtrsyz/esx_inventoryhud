@@ -24,15 +24,13 @@ AddEventHandler(
 )
 
 RegisterNetEvent("esx_inventoryhud:openPlayerInventory")
-AddEventHandler(
-    "esx_inventoryhud:openPlayerInventory",
-    function(target, playerName)
-        targetPlayer = target
-        targetPlayerName = playerName
-        setPlayerInventoryData()
-        openPlayerInventory()
-    end
-)
+AddEventHandler("esx_inventoryhud:openPlayerInventory", function(target, playerName)
+	targetPlayer = target
+    targetPlayerName = playerName
+    if Config.HidePlayerName then targetPlayerName = '' end
+    setPlayerInventoryData()
+    openPlayerInventory()
+end)
 
 function refreshPlayerInventory()
     setPlayerInventoryData()
@@ -44,8 +42,11 @@ function setPlayerInventoryData()
         function(data)
             SendNUIMessage(
                 {
-                    action = "setInfoText",
-                    text = "<strong>" .. _U("player_inventory") .. "</strong><br>" .. targetPlayerName .. " (" .. targetPlayer .. ")"
+                    action = "setInfoOther",
+                    label = 'Other Player',
+                    id = targetPlayerName,
+                    max = '~',
+                    used = '~',
                 }
             )
 
@@ -56,7 +57,6 @@ function setPlayerInventoryData()
             weapons = data.weapons
 
             if Config.IncludeCash and money ~= nil and money > 0 then
-                for key, value in pairs(accounts) do
                     moneyData = {
                         label = _U("cash"),
                         name = "cash",
@@ -69,7 +69,6 @@ function setPlayerInventoryData()
                     }
 
                     table.insert(items, moneyData)
-                end
             end
 
             if Config.IncludeAccounts and accounts ~= nil then

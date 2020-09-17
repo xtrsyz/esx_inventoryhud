@@ -2,7 +2,7 @@
     padding: 0;
     margin: 0;
     font-family: 'Signika', sans-serif;
-    text-transform: uppercase;
+    text-transform: none;
     color: white;
     text-shadow:
         -0.5px -0.5px 0 #000,
@@ -17,9 +17,22 @@
     top: 0;
     width: 100vw;
     height: 100vh;
-    background-color: rgba(0, 0, 0, 0.35);
+    background: rgba(48, 48, 48, 0.5); 
+    background-size: 200% 200%;
     display: none;
     z-index: 0;
+    overflow: hidden;
+}
+
+#playerInventoryFastItems {
+    width: 625px;
+    height: 120px;
+    position : absolute;
+    left: 0%;
+    float:left;
+    overflow:hidden;
+    z-index: 99999 !important;
+    
 }
 
 .inventory {
@@ -29,15 +42,17 @@
     transform: translate(-50%, -50%);
     width: 1550px;
     height: 600px;
-    box-shadow: 1px 1px 10px rgba(0, 0, 0, .4);
-    background-color: rgba(17, 5, 17, 0.2);
+    border: none;
+    outline: none;
+    font-size: 13px;
+
 }
 
 #playerInventory {
     width: 625px;
     height: 600px;
     float: left;
-    overflow-y: scroll
+    overflow-y: scroll;
 }
 
 #controls {
@@ -45,7 +60,9 @@
     height: 600px;
     float: left;
     position: relative;
-    background-color: rgba(17, 5, 17, 0.2);
+    opacity:0.9;
+    background-color: rgba(105, 105, 105, 0.4);
+    border-radius:5px;
     left: 0;
     top: 0;
 }
@@ -53,8 +70,8 @@
 #otherInventory {
     width: 625px;
     height: 600px;
-    float: left;
-    overflow-y: scroll
+    float: right;
+    overflow-y: scroll;
 }
 
 #count {
@@ -74,22 +91,68 @@ input[type=number] {
 }
 
 .slot {
-    float: left;
-    width: 117px;
-    height: 117px;
-    background-color: rgba(17, 5, 17, 0.6);
-    margin: 2px;
     position: relative;
+    float: left;
+    width: 110px;
+    height: 110px;
+    text-align: center;
+    border: 3px solid rgba(105, 105, 105, 0.9);
+    background-color: rgba(103, 103, 103, 0.5);
+    transition: all 0.2s ease;
+    margin: 0.25vh;
+    border-radius : 3px;
+    overflow: hidden;
+    bottom : -21.0%;
 }
 
-.slot:hover {
-    opacity: 0.8;
+.slotfix {
+    position: relative;
+    float: left;
+    width: 110px;
+    height: 110px;
+    text-align: center;
+    border: 3px solid rgba(105, 105, 105, 0.9);
+    background-color: rgba(103, 103, 103, 0.5);
+    transition: all 0.2s ease;
+    margin: 0.25vh;
+    border-radius : 5px;
+    overflow: hidden;
+}
+
+.slotFast {
+    float: left;
+    width: 110px;
+    height: 110px;
+    border: 3px solid rgba(105, 105, 105, 0.9);
+    background-color: rgba(82, 82, 82, 0.5);
+    transition: all 0.2s ease;
+    margin: 0.25vh;
+    position: relative;
+    border-radius : 5px;
+    overflow: hidden;
+    z-index: 99999 !important;
+}
+
+.keybind {
+    position: absolute;
+    top: 0;
+    z-index: 500;
+    background-color : rgba(111, 111, 185, 0.9);
+    padding : 1px 5px;
+    border-bottom-right-radius : 3px;
+    font-size : 1.1vh;
+    text-align: center;
+    z-index: 99999 !important;
+}
+
+.slot:hover, .slotFast:hover {
+    filter: brightness(0.6);
 }
 
 .item,
 .item-other {
-    width: 117px;
-    height: 117px;
+    width: 110px;
+    height: 110px;
     background-size: contain;
     background-repeat: no-repeat;
     background-position: center center;
@@ -99,13 +162,13 @@ input[type=number] {
     position: absolute;
     bottom: 0;
     text-align: center;
-    padding-top: 5px;
-    padding-bottom: 5px;
+    padding-top: 2px;
     width: 117px;
-    min-height: 20px;
+    min-height: 13px;
     z-index: 500;
-    font-size: 12px;
-    background-color: rgba(17, 5, 17, 0.8);
+    font-size: 1.2vh;
+    background-color: rgba(105, 105, 105, 0.9); 
+    color: #ffffff;
 }
 
 .ui-draggable-dragging .item-name,
@@ -116,11 +179,26 @@ input[type=number] {
 .item-count {
     position: absolute;
     top: 0;
-    text-align: right;
-    width: 114px;
-    height: 20px;
+    text-align: center;
+    right: 0;
     z-index: 500;
+    background-color : rgba(105, 105, 105, 0.9); 
+    padding : 0 5px 3px 7px;
+    border-bottom-left-radius: 3px;
+    font-size : 1.1vh;
 }
+
+.item-count2 {
+    position: absolute;
+    top: 0;
+    text-align: center;
+    right: 0;
+    z-index: 500;
+    background-color : rgba(105, 105, 105, 0.9); 
+    padding : 0 5px 3px 7px;
+    border-bottom-left-radius: 3px;
+    font-size : 1.1vh;
+  }
 
 .ammoIcon {
     width: 10px;
@@ -130,12 +208,13 @@ input[type=number] {
 .info-div {
     text-align: center;
     padding: 5px;
-    background-color: rgba(17, 5, 17, 0.6);
+    background-color: rgba(255, 255, 255, 0.2);
     width: 80%;
     position: absolute;
     left: 50%;
     top: 15%;
     transform: translate(-50%, -50%);
+    border-radius : 5px;
 }
 
 .controls-div {
@@ -148,19 +227,22 @@ input[type=number] {
 .control {
     width: 150px;
     height: 40px;
-    background-color: rgba(17, 5, 17, 0.6);
+    background-color: rgba(255, 255, 255, 0.2);
     margin: 10px;
     text-align: center;
     vertical-align: middle;
     line-height: 40px;
+    border-radius: 5px;
+    max-width: 165px;
+    transition: ease-in 0.15s
 }
 
 .control.disabled {
-    background-color: rgba(17, 5, 17, 0.1);
+    background-color: rgba(189, 44, 44, 0.692);
 }
 
 .hoverControl {
-    background-color: rgb(10, 2, 10);
+    background-color: rgba(151, 238, 38, 0.7);
 }
 
 .item-name-bg {
@@ -174,19 +256,20 @@ input[type=number] {
 #playerInventory::-webkit-scrollbar-track,
 #otherInventory::-webkit-scrollbar-track {
     background-color: none;
-    border: none;
+    border:none
 }
 
 #playerInventory::-webkit-scrollbar,
 #otherInventory::-webkit-scrollbar {
-    width: 10px;
-    background-color: rgba(17, 5, 17, 0.2);
+    width: 5px;
+    background-color: rgba(111, 111, 185, 0.4);
+    border-radius:5px;
 }
 
 #playerInventory::-webkit-scrollbar-thumb,
 #otherInventory::-webkit-scrollbar-thumb {
-    background-color: rgba(17, 5, 17, 1);
-    border: 2px solid rgba(17, 5, 17, 1);
+  background-color: rgba(255, 255, 255, 0.38);
+  border-radius:5px;
 }
 
 .nearbyPlayerButton {
@@ -195,8 +278,8 @@ input[type=number] {
     display: block;
     text-decoration: none;
     padding: 2px;
-    color: rgba(255, 255, 255, 0.85);
-    background-color: rgba(63, 57, 83, 0.226);
+    color: #ffffff;
+    background-color: rgba(128, 187, 50, 0.7);
     text-shadow: none;
     font-size: 14px !important;
     outline: none;
@@ -207,7 +290,7 @@ input[type=number] {
 }
 
 .nearbyPlayerButton:hover {
-    background-color: rgba(34, 29, 46, 0.8);
+    background-color: rgba(111, 111, 185, 0.4);
 }
 
 #noSecondInventoryMessage {
@@ -222,9 +305,18 @@ input[type=number] {
         width: 1300px;
     }
 
-    #playerInventory {
+    #playerInventory, #playerInventoryFastItems {
         width: 550px;
     }
+
+    .slot,.slotFast,.item,
+    .item-other,.slotfix {
+        width : 100px;
+        height : 100px;
+    }
+
+    .item-name{width:100px}
+
 
     #controls {
         width: 200px;
@@ -244,7 +336,7 @@ input[type=number] {
         width: 1000px;
     }
 
-    #playerInventory {
+    #playerInventory, #playerInventoryFastItems {
         width: 425px;
     }
 
@@ -260,3 +352,122 @@ input[type=number] {
         width: 420px;
     }
 }
+
+
+ body .ui .inventory .inventory-wrapper {
+  display: inline-block;
+  height: 100%;
+  width: 40%;
+  overflow: visible;
+  position: absolute;
+  left: 0;
+ }
+ 
+ body .ui .inventory .inventory-wrapper:last-child {
+  right: 0;
+  left: auto;
+ }
+ 
+ body .ui .inventory .inventory-wrapper #inventoryOne, body .ui .inventory .inventory-wrapper #inventoryTwo {
+  height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+  display: grid;
+  grid-template-columns: 19.35% 19.35% 19.35% 19.35% 19.35%;
+  grid-gap: 0.7%;
+  width: 100.5%;
+  min-width: 100.5%;
+  grid-auto-rows: 20%;
+ }
+ 
+ body .ui .inventory .inventory-wrapper #inventoryOne.disabled, body .ui .inventory .inventory-wrapper #inventoryTwo.disabled {
+  filter: brightness(0.25);
+  transition: filter ease-in 0.15s;
+ }
+ 
+ body .ui .inventory .inventory-wrapper .inv-label {
+  font-size: 25px;
+  width: 100%;
+ }
+ 
+ body .ui .inventory .inventory-wrapper .inv-id {
+  text-align: left;
+  font-size: 12px;
+ }
+ 
+ body .ui .inventory .inventory-wrapper .inv-slots {
+  position: absolute;
+  bottom: 0;
+ }
+ 
+ body .ui .inventory .inventory-wrapper .left-data {
+  width: 100%;
+  display: flex;
+  position: absolute;
+  top: -60px;
+  padding-left: 5px;
+  text-transform: none !important;
+  flex-direction: row-reverse;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+ }
+ 
+ body .ui .inventory .inventory-wrapper .left-data .inv-id {
+  text-align: right;
+ }
+ 
+ body .ui .inventory .inventory-wrapper .left-data .inv-slots {
+  right: 0;
+ }
+ 
+ body .ui .inventory .inventory-wrapper .left-data .inv-weight {
+  text-align: center;
+ }
+ 
+ body .ui .inventory .inventory-wrapper .right-data {
+  width: 100%;
+  display: flex;
+  position: absolute;
+  top: -60px;
+  padding-left: 5px;
+  text-transform: none !important;
+  flex-direction: row-reverse;
+  flex-wrap: wrap;
+  right: 0;
+  justify-content: flex-start;
+ }
+ 
+ body .ui .inventory .inventory-wrapper .right-data .inv-label {
+  text-align: right;
+ }
+ 
+ body .ui .inventory .inventory-wrapper .right-data .inv-slots {
+  left: 0;
+  margin-right: auto;
+ }
+
+ body .ui .inventory #controls {
+     display: inline-block;
+     width: 18%;
+     height: 100%;
+     position: absolute;
+     left: 0;
+     right: 0;
+     margin-left: auto;
+     margin-right: auto;
+     border: 0px solid #b3b6bb;
+     transition: 0.2s;
+   }
+   
+   body .ui .inventory #controls .info-div {
+     text-align: center;
+     padding: 10px;
+     background-color: rgba(20, 11, 20, 0.75);
+     width: 50%;
+     position: absolute;
+     left: 50%;
+     top: 15%;
+     transform: translate(-50%, -50%);
+     border: 0px solid #b3b6bb;
+   }
+ 

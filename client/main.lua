@@ -1,83 +1,15 @@
-local Keys = {
-    ["ESC"] = 322,
-    ["F1"] = 288,
-    ["F2"] = 289,
-    ["F3"] = 170,
-    ["F5"] = 166,
-    ["F6"] = 167,
-    ["F7"] = 168,
-    ["F8"] = 169,
-    ["F9"] = 56,
-    ["F10"] = 57,
-    ["~"] = 243,
-    ["1"] = 157,
-    ["2"] = 158,
-    ["3"] = 160,
-    ["4"] = 164,
-    ["5"] = 165,
-    ["6"] = 159,
-    ["7"] = 161,
-    ["8"] = 162,
-    ["9"] = 163,
-    ["-"] = 84,
-    ["="] = 83,
-    ["BACKSPACE"] = 177,
-    ["TAB"] = 37,
-    ["Q"] = 44,
-    ["W"] = 32,
-    ["E"] = 38,
-    ["R"] = 45,
-    ["T"] = 245,
-    ["Y"] = 246,
-    ["U"] = 303,
-    ["P"] = 199,
-    ["["] = 39,
-    ["]"] = 40,
-    ["ENTER"] = 18,
-    ["CAPS"] = 137,
-    ["A"] = 34,
-    ["S"] = 8,
-    ["D"] = 9,
-    ["F"] = 23,
-    ["G"] = 47,
-    ["H"] = 74,
-    ["K"] = 311,
-    ["L"] = 182,
-    ["LEFTSHIFT"] = 21,
-    ["Z"] = 20,
-    ["X"] = 73,
-    ["C"] = 26,
-    ["V"] = 0,
-    ["B"] = 29,
-    ["N"] = 249,
-    ["M"] = 244,
-    [","] = 82,
-    ["."] = 81,
-    ["LEFTCTRL"] = 36,
-    ["LEFTALT"] = 19,
-    ["SPACE"] = 22,
-    ["RIGHTCTRL"] = 70,
-    ["HOME"] = 213,
-    ["PAGEUP"] = 10,
-    ["PAGEDOWN"] = 11,
-    ["DELETE"] = 178,
-    ["LEFT"] = 174,
-    ["RIGHT"] = 175,
-    ["TOP"] = 27,
-    ["DOWN"] = 173,
-    ["NENTER"] = 201,
-    ["N4"] = 108,
-    ["N5"] = 60,
-    ["N6"] = 107,
-    ["N+"] = 96,
-    ["N-"] = 97,
-    ["N7"] = 117,
-    ["N8"] = 61,
-    ["N9"] = 118
-}
-
 isInInventory = false
 ESX = nil
+local fastSlot = {}
+local fastControl = {157,158,160,164,166}
+
+function ShowPlayerName( PlayerId )
+    if Config.HidePlayerName then
+        return ''
+    else
+        return GetPlayerName(PlayerId)
+    end
+end
 
 Citizen.CreateThread(
     function()
@@ -114,7 +46,21 @@ function openInventory()
         }
     )
     SetNuiFocus(true, true)
+    ESX.UI.Menu.CloseAll()
 end
+
+RegisterNetEvent("esx_inventoryhud:doClose")
+AddEventHandler("esx_inventoryhud:doClose", function()
+    closeInventory()
+end)
+
+RegisterCommand('closeinv', function(source, args, raw)
+    closeInventory()
+end)
+
+RegisterCommand('openinv', function(source, args, raw)
+    openInventory()
+end)
 
 function closeInventory()
     isInInventory = false
@@ -124,6 +70,7 @@ function closeInventory()
         }
     )
     SetNuiFocus(false, false)
+    ClearPedSecondaryTask(GetPlayerPed(-1))
 end
 
 RegisterNUICallback(
@@ -150,7 +97,7 @@ RegisterNUICallback(
                 table.insert(
                     elements,
                     {
-                        label = GetPlayerName(players[i]),
+                        label = ShowPlayerName(players[i]),
                         player = GetPlayerServerId(players[i])
                     }
                 )
@@ -158,15 +105,7 @@ RegisterNUICallback(
         end
 
         if not foundPlayers then
-            exports.pNotify:SendNotification(
-                {
-                    text = _U("players_nearby"),
-                    type = "error",
-                    timeout = 3000,
-                    layout = "bottomCenter",
-                    queue = "inventoryhud"
-                }
-            )
+            TriggerEvent('esx:showNotification', _U("players_nearby"))
         else
             SendNUIMessage(
                 {
@@ -237,19 +176,15 @@ RegisterNUICallback(
                 count = GetAmmoInPedWeapon(PlayerPedId(), GetHashKey(data.item.name))
             end
 
-            TriggerServerEvent("esx:giveInventoryItem", data.player, data.item.type, data.item.name, count)
+            if data.item.type == "item_money" then
+				TriggerServerEvent("esx:giveInventoryItem", data.player, "item_account", "money", count)
+			else
+				TriggerServerEvent("esx:giveInventoryItem", data.player, data.item.type, data.item.name, count)
+			end
             Wait(250)
             loadPlayerInventory()
         else
-            exports.pNotify:SendNotification(
-                {
-                    text = _U("player_nearby"),
-                    type = "error",
-                    timeout = 3000,
-                    layout = "bottomCenter",
-                    queue = "inventoryhud"
-                }
-            )
+            TriggerEvent('esx:showNotification', _U("players_nearby"))
         end
         cb("ok")
     end
@@ -280,11 +215,24 @@ function loadPlayerInventory()
         "esx_inventoryhud:getPlayerInventory",
         function(data)
             items = {}
+            name = {}
+            fastItems = {}
             inventory = data.inventory
             accounts = data.accounts
             money = data.money
             weapons = data.weapons
+            weight = data.weight*0.001
+            maxWeight = data.maxWeight*0.001
 
+            SendNUIMessage(
+                {
+                    action = "setInfoText",
+                    label = 'Inventory',
+                    id = GetPlayerName(PlayerId()),
+                    max = data.maxWeight,
+                    used = data.weight,
+                }
+            )
             if Config.IncludeCash and money ~= nil and money > 0 then
                 moneyData = {
                     label = _U("cash"),
@@ -296,7 +244,6 @@ function loadPlayerInventory()
                     limit = -1,
                     canRemove = true
                 }
-
                 table.insert(items, moneyData)
             end
 
@@ -324,11 +271,34 @@ function loadPlayerInventory()
 
             if inventory ~= nil then
                 for key, value in pairs(inventory) do
-                    if inventory[key].count <= 0 then
-                        inventory[key] = nil
+                    if value.count <= 0 then
+                        value = nil
                     else
-                        inventory[key].type = "item_standard"
-                        table.insert(items, inventory[key])
+                        value.type = "item_standard"
+                        local found = false
+                        for slot, weapon in pairs(fastSlot) do
+                            if weapon.name == value.name then
+                                table.insert(
+                                    fastItems,
+                                    {
+                                        label = value.label,
+                                        count = value.count,
+                                        limit = value.limit,
+                                        type = value.type,
+                                        name = value.name,
+                                        usable = value.usable,
+                                        rare = value.rare,
+                                        canRemove = value.canRemove,
+                                        slot = slot
+                                    }
+                                )
+                                found = true
+                                break
+                            end
+                        end
+                        if found == false then
+                            table.insert(items, value)
+                        end
                     end
                 end
             end
@@ -337,21 +307,45 @@ function loadPlayerInventory()
                 for key, value in pairs(weapons) do
                     local weaponHash = GetHashKey(weapons[key].name)
                     local playerPed = PlayerPedId()
-                    if HasPedGotWeapon(playerPed, weaponHash, false) and weapons[key].name ~= "WEAPON_UNARMED" then
-                        local ammo = GetAmmoInPedWeapon(playerPed, weaponHash)
-                        table.insert(
-                            items,
-                            {
-                                label = weapons[key].label,
-                                count = ammo,
-                                limit = -1,
-                                type = "item_weapon",
-                                name = weapons[key].name,
-                                usable = false,
-                                rare = false,
-                                canRemove = true
-                            }
-                        )
+                    if weapons[key].name ~= "WEAPON_UNARMED" then
+
+                        local found = false
+                        for slot, weapon in pairs(fastSlot) do
+                            if weapon.name == weapons[key].name then
+                                table.insert(
+                                    fastItems,
+                                    {
+                                        label = weapons[key].label,
+                                        count = weapons[key].ammo,
+                                        limit = -1,
+                                        type = "item_weapon",
+                                        name = weapons[key].name,
+                                        usable = false,
+                                        rare = false,
+                                        canRemove = true,
+                                        slot = slot
+                                    }
+                                )
+                                found = true
+                                break
+                            end
+                        end
+
+                        if found == false then
+                            table.insert(
+                                items,
+                                {
+                                    label = weapons[key].label,
+                                    count = weapons[key].ammo,
+                                    limit = -1,
+                                    type = "item_weapon",
+                                    name = weapons[key].name,
+                                    usable = false,
+                                    rare = false,
+                                    canRemove = true
+                                }
+                            )
+                        end
                     end
                 end
             end
@@ -359,7 +353,8 @@ function loadPlayerInventory()
             SendNUIMessage(
                 {
                     action = "setItems",
-                    itemList = items
+                    itemList = items,
+                    fastItems = fastItems,
                 }
             )
         end,
@@ -379,33 +374,32 @@ Citizen.CreateThread(
                 DisableControlAction(0, 257, true) -- Attack 2
                 DisableControlAction(0, 25, true) -- Aim
                 DisableControlAction(0, 263, true) -- Melee Attack 1
-                DisableControlAction(0, Keys["W"], true) -- W
-                DisableControlAction(0, Keys["U"], true) -- U
-                DisableControlAction(0, Keys["A"], true) -- A
+                DisableControlAction(0, 32, true) -- W
+                DisableControlAction(0, 34, true) -- A
                 DisableControlAction(0, 31, true) -- S (fault in Keys table!)
                 DisableControlAction(0, 30, true) -- D (fault in Keys table!)
 
-                DisableControlAction(0, Keys["R"], true) -- Reload
-                DisableControlAction(0, Keys["SPACE"], true) -- Jump
-                DisableControlAction(0, Keys["Q"], true) -- Cover
-                DisableControlAction(0, Keys["TAB"], true) -- Select Weapon
-                DisableControlAction(0, Keys["F"], true) -- Also 'enter'?
+                DisableControlAction(0, 45, true) -- Reload
+                DisableControlAction(0, 22, true) -- Jump
+                DisableControlAction(0, 44, true) -- Cover
+                DisableControlAction(0, 37, true) -- Select Weapon
+                DisableControlAction(0, 23, true) -- Also 'enter'?
 
-                DisableControlAction(0, Keys["F1"], true) -- Disable phone
-                DisableControlAction(0, Keys["F2"], true) -- Inventory
-                DisableControlAction(0, Keys["F3"], true) -- Animations
-                DisableControlAction(0, Keys["F6"], true) -- Job
+                DisableControlAction(0, 288, true) -- Disable phone
+                DisableControlAction(0, 289, true) -- Inventory
+                DisableControlAction(0, 170, true) -- Animations
+                DisableControlAction(0, 167, true) -- Job
 
-                DisableControlAction(0, Keys["V"], true) -- Disable changing view
-                DisableControlAction(0, Keys["C"], true) -- Disable looking behind
-                DisableControlAction(0, Keys["X"], true) -- Disable clearing animation
-                DisableControlAction(2, Keys["P"], true) -- Disable pause screen
+                DisableControlAction(0, 0, true) -- Disable changing view
+                DisableControlAction(0, 26, true) -- Disable looking behind
+                DisableControlAction(0, 73, true) -- Disable clearing animation
+                DisableControlAction(2, 199, true) -- Disable pause screen
 
                 DisableControlAction(0, 59, true) -- Disable steering in vehicle
                 DisableControlAction(0, 71, true) -- Disable driving forward in vehicle
                 DisableControlAction(0, 72, true) -- Disable reversing in vehicle
 
-                DisableControlAction(2, Keys["LEFTCTRL"], true) -- Disable going stealth
+                DisableControlAction(2, 36, true) -- Disable going stealth
 
                 DisableControlAction(0, 47, true) -- Disable weapon
                 DisableControlAction(0, 264, true) -- Disable melee
@@ -418,8 +412,19 @@ Citizen.CreateThread(
                 DisableControlAction(27, 75, true) -- Disable exit vehicle
             end
         end
-    end
-)
+end)
+
+-- HIDE WEAPON WHEEL
+Citizen.CreateThread(function ()
+	Citizen.Wait(2000)
+	while true do
+		Citizen.Wait(0)
+		HideHudComponentThisFrame(19)
+		HideHudComponentThisFrame(20)
+		BlockWeaponWheelThisFrame()
+		DisableControlAction(0, 37,true)
+	end
+end)
 
 RegisterNetEvent("esx_inventoryhud:closeInventory")
 AddEventHandler(
@@ -438,3 +443,48 @@ AddEventHandler(
         end
     end
 )
+
+--FAST ITEMS
+RegisterNUICallback("PutIntoFast", function(data, cb)
+	if data.item.slot ~= nil then
+		fastSlot[data.item.slot] = nil
+	end
+		fastSlot[data.slot] = {name = data.item.name, type = data.item.type}
+		TriggerServerEvent("esx_inventoryhud:changeFastItem", fastSlot)
+		loadPlayerInventory()
+		cb("ok")
+end)
+
+RegisterNUICallback("TakeFromFast", function(data, cb)
+	fastSlot[data.item.slot] = nil
+	TriggerServerEvent("esx_inventoryhud:changeFastItem", fastSlot)
+	loadPlayerInventory()
+	cb("ok")
+end)
+
+Citizen.CreateThread(function()
+		while true do
+            Citizen.Wait(0)
+            for key, control in pairs(fastControl) do
+                if IsDisabledControlJustReleased(1, control) then
+                    if fastSlot[key] ~= nil then
+                        if fastSlot[key].type == 'item_weapon' then
+                            if GetSelectedPedWeapon(GetPlayerPed(-1)) == GetHashKey(fastSlot[key].name) then
+                                SetCurrentPedWeapon(GetPlayerPed(-1), "WEAPON_UNARMED",true)
+                            else
+                                SetCurrentPedWeapon(GetPlayerPed(-1), fastSlot[key].name,true)
+                            end
+                        else
+                            TriggerServerEvent("esx:useItem", fastSlot[key].name)
+                        end
+                    end
+                end
+            end
+        end
+end)
+
+AddEventHandler('onResourceStop', function(resource)
+    if resource == GetCurrentResourceName() then
+        closeInventory()
+    end
+end)

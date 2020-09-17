@@ -14,15 +14,11 @@ function setShopData(zone, items)
 
     SendNUIMessage(
         {
-            action = "setType",
-            type = "shop"
-        }
-    )
-
-    SendNUIMessage(
-        {
-            action = "setInfoText",
-            text = "Obchod"
+            action = "setInfoOther",
+            label = 'Shop',
+            id = zone,
+            max = '~',
+            used = '~',
         }
     )
 
@@ -49,7 +45,7 @@ function openShop()
 end
 
 RegisterNUICallback(
-    "BuyItem",
+    "TakeFromShop",
     function(data, cb)
         if type(data.number) == "number" and math.floor(data.number) == data.number then
             local count = tonumber(data.number)

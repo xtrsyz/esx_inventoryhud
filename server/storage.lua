@@ -64,41 +64,17 @@ AddEventHandler(
                     if count > 0 and inventoryItem.count >= count then
                         -- can the player carry the said amount of x item?
                         if sourceItem.limit ~= -1 and (sourceItem.count + count) > sourceItem.limit then
-                            TriggerClientEvent(
-                                "pNotify:SendNotification",
-                                _source,
-                                {
-                                    text = "Nemáš dostatek místa v inventáři!",
-                                    type = "error",
-                                    timeout = 3000
-                                }
-                            )
+                            TriggerClientEvent('esx:showNotification', _source, _U('not_enough_space'))
                         else
                             inventory.removeItem(item, count)
                             xPlayer.addInventoryItem(item, count)
                             
                             TriggerEvent("esx_adminmenu:logSociety", storage, GetPlayerIdentifiers(_source), xPlayer, "TAKE", inventoryItem.label, count, inventoryItem.count-count)
 
-                            TriggerClientEvent(
-                                "pNotify:SendNotification",
-                                _source,
-                                {
-                                    text = "Vzal jsi " .. count .. "x " .. inventoryItem.label,
-                                    type = "success",
-                                    timeout = 3000
-                                }
-                            )
+                            TriggerClientEvent('esx:showNotification', _source, _U("took_from_storage", count, inventoryItem.label))
                         end
                     else
-                        TriggerClientEvent(
-                            "pNotify:SendNotification",
-                            _source,
-                            {
-                                text = "Tolik toho ve skladu není!",
-                                type = "error",
-                                timeout = 3000
-                            }
-                        )
+                        TriggerClientEvent('esx:showNotification', _source, _U('took_not_enough'))
                     end
                 end
             )
@@ -115,15 +91,7 @@ AddEventHandler(
 
                         TriggerEvent("esx_adminmenu:logSociety", storage, GetPlayerIdentifiers(_source), xPlayer, "TAKE", "Špinavé prachy", count, roomAccountMoney)
                     else
-                        TriggerClientEvent(
-                            "pNotify:SendNotification",
-                            xPlayer.source,
-                            {
-                                text = "Špatný počet!",
-                                type = "error",
-                                timeout = 3000
-                            }
-                        )
+                        TriggerClientEvent('esx:showNotification', _source, _U('bad_amount'))
                     end
                 end
             )
@@ -186,27 +154,11 @@ AddEventHandler(
                         local inventoryItem = inventory.getItem(item)
                         TriggerEvent("esx_adminmenu:logSociety", storage, GetPlayerIdentifiers(_source), xPlayer, "PUT", inventoryItem.label, count, inventoryItem.count)
 
-                        TriggerClientEvent(
-                            "pNotify:SendNotification",
-                            _source,
-                            {
-                                text = "Uložil jsi " .. count .. "x " .. inventoryItem.label,
-                                type = "success",
-                                timeout = 3000
-                            }
-                        )
+                        TriggerClientEvent('esx:showNotification', _source, _U("put_into_storage", count, inventoryItem.label))
                     end
                 )
             else
-                TriggerClientEvent(
-                    "pNotify:SendNotification",
-                    xPlayer.source,
-                    {
-                        text = "Špatný počet!",
-                        type = "error",
-                        timeout = 3000
-                    }
-                )
+                TriggerClientEvent('esx:showNotification', _source, _U('bad_amount'))
             end
         elseif type == "item_account" then
             local playerAccountMoney = xPlayer.getAccount(item).money
@@ -224,15 +176,7 @@ AddEventHandler(
                     end
                 )
             else
-                TriggerClientEvent(
-                    "pNotify:SendNotification",
-                    xPlayer.source,
-                    {
-                        text = "Špatný počet!",
-                        type = "error",
-                        timeout = 3000
-                    }
-                )
+                TriggerClientEvent('esx:showNotification', _source, _U('bad_amount'))
             end
         elseif type == "item_weapon" then
             TriggerEvent(
