@@ -19,7 +19,8 @@ ESX.RegisterServerCallback(
 				accounts = targetXPlayer.accounts, 
 				weapons = targetXPlayer.loadout, 
 				weight = targetXPlayer.getWeight(), 
-				maxWeight = targetXPlayer.maxWeight
+				maxWeight = targetXPlayer.maxWeight,
+				serverTime = os.time(),
 			})
 		else
 			cb(nil)

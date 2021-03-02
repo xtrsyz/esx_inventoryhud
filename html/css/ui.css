@@ -471,3 +471,58 @@ input[type=number] {
      border: 0px solid #b3b6bb;
    }
  
+.Information {
+  display: none;
+  text-align: center;
+  padding: 2px;
+  padding-top: 7%;
+  width: 30%;
+  position: absolute;
+  bottom: 4%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  border-radius: 5px;
+  color: white;
+}
+
+.Information hr, .weight-div hr {
+border: none;
+}
+
+.Information .info-name, .info-name {
+font-size: 15px;
+border-bottom: 2px solid #ffffff;
+}
+
+.Information .info-uniqueness, .Information .info-meta, .info-meta {
+font-size: 10px;
+margin-top: 10px;
+}
+
+.Information .info-uniqueness .meta-key, .Information .info-uniqueness .meta-val, .Information .info-meta .meta-key, .Information .info-meta .meta-val, .info-uniqueness .meta-key, body .ui .inventory #controls .weight-div .info-uniqueness .meta-val, body .ui .inventory #controls .weight-div .info-meta .meta-key, body .ui .inventory #controls .weight-div .info-meta .meta-val {
+display: inline-block;
+}
+
+.Information .info-desc, .info-desc {
+font-size: 11px;
+}
+
+.Information .info-weight, .info-weight {
+  font-size: 10px;
+  }
+
+.Information .tooltip-weight, body .ui .inventory #controls .weight-div .tooltip-weight {
+font-size: 10px;
+}
+
+.item-quality {
+  text-align:center;
+  font-size:7px;
+  position:absolute;
+  height: 10px;
+  bottom:0px;
+  color:white;
+  line-height: 0.9vh;
+  left: -5px;
+  background: rgba(111,195,111,0.9);
+}

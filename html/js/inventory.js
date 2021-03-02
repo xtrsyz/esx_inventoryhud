@@ -26,6 +26,8 @@ window.addEventListener("message", function (event) {
     } else if (event.data.action == "setType") {
         type = event.data.type;
     } else if (event.data.action == "setItems") {
+        itemQList = event.data.QualityList
+        itemSList = event.data.SerialList
         inventorySetup(event.data.itemList, event.data.fastItems);
 
         $('.item').draggable({
@@ -63,6 +65,87 @@ window.addEventListener("message", function (event) {
                 }
             }
         });
+
+        $('.item').hover(
+            function () {
+                // in
+                $('.Information').find('.info-name').html("");
+                $('.Information').find('.info-uniqueness').html("");
+                $('.Information').find('.info-meta').html("");
+                $('.Information').hide();
+
+                itemData = $(this).data("item");
+                if (itemData !== undefined) {
+                    $('.Information').find('.info-name').html(itemData.label.toUpperCase());
+                    if (itemData.description !== undefined) {
+                        $('.Information').find('.info-desc').html(itemData.description);
+                    } else {
+                        $('.Information').find('.info-desc').html("This Item Has No Information");
+                    }
+
+                    var qualityI = GetItemQualityList(itemData)
+                    var serialI = GetItemSerialList(itemData)
+                    if (itemData.description !== undefined) {
+                        if (qualityI) {
+                            if (serialI) {
+                                $('.Information').find('.info-desc').html(itemData.description +'<br /> Serial number: ' + serialI + '<br /> Durability: ' + Number(qualityI));
+                            } else {
+                                $('.Information').find('.info-desc').html(itemData.description + '<br /> Durability: ' + Number(qualityI));
+                            }
+                        } else {
+                            if (serialI) {
+                                $('.Information').find('.info-desc').html(itemData.description +'<br /> Serial number: ' + serialI);
+                            } else {
+                                $('.Information').find('.info-desc').html(itemData.description);
+                            }
+                        }
+                    } else {
+                        if (qualityI) {
+                            if (serialI) {
+                                $('.Information').find('.info-desc').html('The item does not have any information. <br /> Serial number: ' + serialI + '<br /> Durability: ' + Number(qualityI));
+                            } else {
+                                $('.Information').find('.info-desc').html('The item does not have any information' + '<br /> Durability: ' + Number(qualityI));
+                            }
+                        } else {
+                            if (serialI) {
+                                $('.Information').find('.info-desc').html('The item does not have any information <br /> Seria number: ' + serialI);
+                            } else {
+                                $('.Information').find('.info-desc').html('The item does not have any information');
+                            }
+                        }
+                    }
+
+                    if (itemData.staticMeta !== undefined || itemData.staticMeta !== "") {
+                        if (itemData.type === 1) {
+                            $('.Information').find('.info-meta').append('<div class="meta-entry"><div class="meta-key">Registered Owner</div> : <div class="meta-val">' + itemData.staticMeta.owner + '</div></div>');
+                        } else if (itemData.itemId === 'license') {
+                            $('.Information').find('.info-meta').append('<div class="meta-entry"><div class="meta-key">Name</div> : <div class="meta-val">' + itemData.staticMeta.name + '</div></div>');
+                            $('.Information').find('.info-meta').append('<div class="meta-entry"><div class="meta-key">Issued On</div> : <div class="meta-val">' + itemData.staticMeta.issuedDate + '</div></div>');
+                            $('.Information').find('.info-meta').append('<div class="meta-entry"><div class="meta-key">Height</div> : <div class="meta-val">' + itemData.staticMeta.height + '</div></div>');
+                            $('.Information').find('.info-meta').append('<div class="meta-entry"><div class="meta-key">Date of Birth</div> : <div class="meta-val">' + itemData.staticMeta.dob + '</div></div>');
+                            $('.Information').find('.info-meta').append('<div class="meta-entry"><div class="meta-key">Phone Number</div> : <div class="meta-val">' + itemData.staticMeta.phone + '</div></div>');
+                            $('.Information').find('.info-meta').append('<div class="meta-entry"><div class="meta-key">Citizen ID</div> : <div class="meta-val">' + itemData.staticMeta.id + '-' + itemData.staticMeta.user + '</div></div>');
+
+                            if (itemData.staticMeta.endorsements !== undefined) {
+                                $('.Information').find('.info-meta').append('<div class="meta-entry"><div class="meta-key">Endorsement</div> : <div class="meta-val">' + itemData.staticMeta.endorsements + '</div></div>');
+                            }
+                        } else if (itemData.itemId === 'gold') {
+                            $('.Information').find('.info-meta').append('<div class="meta-entry"><div class="meta-key"></div> : <div class="meta-val">This Bar Has A Serial Number Engraved Into It Registered To San Andreas Federal Reserve</div></div>');
+                        }
+                    } else {
+                        $('.Information').find('.info-meta').html("This Item Has No Information");
+                    }
+                    $('.Information').show();
+                }
+            },
+            function () {
+                // out
+                $('.tooltip-div').hide();
+                $('.tooltip-div').find('.tooltip-name').html("");
+                $('.tooltip-div').find('.tooltip-uniqueness').html("");
+                $('.tooltip-div').find('.tooltip-meta').html("");
+            }
+        );
     } else if (event.data.action == "setSecondInventoryItems") {
         secondInventorySetup(event.data.itemList);
     } else if (event.data.action == "setInfoText") {
@@ -95,6 +178,22 @@ window.addEventListener("message", function (event) {
         });
     }
 });
+
+function GetItemQualityList(data) {
+    if (data.info !== undefined && data.info.quality !== undefined) {
+        return data.info.quality;
+    } else {
+        return false;
+    }
+}
+
+function GetItemSerialList(data) {
+    if (data.info !== undefined && data.info.serial !== undefined) {
+        return data.info.serial;
+    } else {
+        return false;
+    }
+}
 
 function makeDroppables(){
     $('.itemFast').droppable({
@@ -132,6 +231,10 @@ function fastSlotSetup(fastItems) {
 }
 
 function closeInventory() {
+    $('.Information').find('.info-name').html("");
+    $('.Information').find('.info-uniqueness').html("");
+    $('.Information').find('.info-meta').html("");
+    $('.Information').hide();
     $.post("http://esx_inventoryhud/NUIFocusOff", JSON.stringify({
         type: type
     }));
@@ -158,6 +261,10 @@ function inventorySetup(items, fastItems) {
             '<div class="item-count">' + count + '</div> <div class="item-name">' + item.label + '</div> </div></div>');
         $('#item-' + index).data('item', item);
         $('#item-' + index).data('inventory', "main");
+        var qualityI = GetItemQualityList(item)
+        if (qualityI !== undefined) {
+            $('#item-' + index).append('<div class="item-quality"></div>');
+        }        
     });
     fastSlotSetup(fastItems);
 }

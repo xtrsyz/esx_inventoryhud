@@ -3,6 +3,13 @@ ESX = nil
 local fastSlot = {}
 local fastControl = {157,158,160,164,166}
 
+function copyTable(data)
+    local newTable = {}
+    for key, value in pairs(data) do
+        newTable[key] = value
+    end
+    return newTable
+end
 function ShowPlayerName( PlayerId )
     if Config.HidePlayerName then
         return ''
@@ -124,7 +131,7 @@ RegisterNUICallback(
 RegisterNUICallback(
     "UseItem",
     function(data, cb)
-        TriggerServerEvent("esx:useItem", data.item.name)
+		TriggerServerEvent("esx:useItem", data.item.name, data.item)
 
         if shouldCloseInventory(data.item.name) then
             closeInventory()
@@ -145,7 +152,7 @@ RegisterNUICallback(
         end
 
         if type(data.number) == "number" and math.floor(data.number) == data.number then
-            TriggerServerEvent("esx:removeInventoryItem", data.item.type, data.item.name, data.number)
+			TriggerServerEvent("esx:removeInventoryItem", data.item.type, data.item.name, data.number, data.item)
         end
 
         Wait(250)
@@ -179,7 +186,7 @@ RegisterNUICallback(
             if data.item.type == "item_money" then
 				TriggerServerEvent("esx:giveInventoryItem", data.player, "item_account", "money", count)
 			else
-				TriggerServerEvent("esx:giveInventoryItem", data.player, data.item.type, data.item.name, count)
+				TriggerServerEvent("esx:giveInventoryItem", data.player, data.item.type, data.item.name, count, data.item)
 			end
             Wait(250)
             loadPlayerInventory()
@@ -274,30 +281,65 @@ function loadPlayerInventory()
                     if value.count <= 0 then
                         value = nil
                     else
+                        local total = value.count                            
                         value.type = "item_standard"
-                        local found = false
-                        for slot, weapon in pairs(fastSlot) do
-                            if weapon.name == value.name then
-                                table.insert(
-                                    fastItems,
-                                    {
-                                        label = value.label,
-                                        count = value.count,
-                                        limit = value.limit,
-                                        type = value.type,
-                                        name = value.name,
-                                        usable = value.usable,
-                                        rare = value.rare,
-                                        canRemove = value.canRemove,
-                                        slot = slot
-                                    }
-                                )
-                                found = true
-                                break
+
+                        if value.batch then
+							print('batch:'..json.encode(value))
+                            for batch, item in pairs(value.batch) do
+                                local found = false
+                                total = total - item.count
+
+                                local newData = copyTable(value)
+                                newData.count = item.count
+                                newData.info = item.info
+                                newData.batch = batch
+                                
+                                
+                                for slot, weapon in pairs(fastSlot) do
+                                    if weapon.name == value.name and weapon.batch == batch then
+                                        newData.slot = slot
+                                        table.insert(fastItems, newData)
+                                        found = true
+                                        break
+                                    end
+                                end
+                                if found == false then
+                                    table.insert(items, newData)
+                                end
                             end
-                        end
-                        if found == false then
-                            table.insert(items, value)
+							print('sisa:'..total)
+                            if total > 0 then
+                                value.count = total
+                                value.batch = false
+                                local found = false
+                                for slot, weapon in pairs(fastSlot) do
+                                    if weapon.name == value.name and not weapon.batch then
+                                        value.slot = slot
+                                        table.insert(fastItems, value)
+                                        found = true
+                                        break
+                                    end
+                                end
+                                if found == false then
+                                    table.insert(items, value)
+                                end
+                            end
+                        else
+							print('nobatch:'..json.encode(value))
+                            value.type = "item_standard"
+                            local found = false
+                            for slot, weapon in pairs(fastSlot) do
+                                if weapon.name == value.name and not weapon.batch then
+                                    value.slot = slot
+                                    table.insert(fastItems, value)
+                                    found = true
+                                    break
+                                end
+                            end
+                            if found == false then
+                                table.insert(items, value)
+                            end
                         end
                     end
                 end
@@ -416,14 +458,14 @@ end)
 
 -- HIDE WEAPON WHEEL
 Citizen.CreateThread(function ()
-	Citizen.Wait(2000)
-	while true do
-		Citizen.Wait(0)
-		HideHudComponentThisFrame(19)
-		HideHudComponentThisFrame(20)
-		BlockWeaponWheelThisFrame()
-		DisableControlAction(0, 37,true)
-	end
+    Citizen.Wait(2000)
+    while true do
+        Citizen.Wait(0)
+        HideHudComponentThisFrame(19)
+        HideHudComponentThisFrame(20)
+        BlockWeaponWheelThisFrame()
+        DisableControlAction(0, 37,true)
+    end
 end)
 
 RegisterNetEvent("esx_inventoryhud:closeInventory")
@@ -446,24 +488,24 @@ AddEventHandler(
 
 --FAST ITEMS
 RegisterNUICallback("PutIntoFast", function(data, cb)
-	if data.item.slot ~= nil then
-		fastSlot[data.item.slot] = nil
-	end
-		fastSlot[data.slot] = {name = data.item.name, type = data.item.type}
-		TriggerServerEvent("esx_inventoryhud:changeFastItem", fastSlot)
-		loadPlayerInventory()
-		cb("ok")
+    if data.item.slot ~= nil then
+        fastSlot[data.item.slot] = nil
+    end
+        fastSlot[data.slot] = {name = data.item.name, type = data.item.type, batch = data.item.batch}
+        TriggerServerEvent("esx_inventoryhud:changeFastItem", fastSlot)
+        loadPlayerInventory()
+        cb("ok")
 end)
 
 RegisterNUICallback("TakeFromFast", function(data, cb)
-	fastSlot[data.item.slot] = nil
-	TriggerServerEvent("esx_inventoryhud:changeFastItem", fastSlot)
-	loadPlayerInventory()
-	cb("ok")
+    fastSlot[data.item.slot] = nil
+    TriggerServerEvent("esx_inventoryhud:changeFastItem", fastSlot)
+    loadPlayerInventory()
+    cb("ok")
 end)
 
 Citizen.CreateThread(function()
-		while true do
+        while true do
             Citizen.Wait(0)
             for key, control in pairs(fastControl) do
                 if IsDisabledControlJustReleased(1, control) then
@@ -475,7 +517,7 @@ Citizen.CreateThread(function()
                                 SetCurrentPedWeapon(GetPlayerPed(-1), fastSlot[key].name,true)
                             end
                         else
-                            TriggerServerEvent("esx:useItem", fastSlot[key].name)
+                            TriggerServerEvent("esx:useItem", fastSlot[key].name, fastSlot[key].batch)
                         end
                     end
                 end
