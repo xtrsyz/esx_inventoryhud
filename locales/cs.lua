@@ -16,5 +16,6 @@ Locales["cs"] = {
 	["bad_amount"] = "Špatný počet!",
 	["took_from_storage"] = "Vzal jsi %sx %s",
 	["took_not_enough"] = "Tolik toho ve skladu není!",
+	["someone"] = "Někdo",
 	["put_into_storage"] = "Vložil jsi %sx %s"
 }

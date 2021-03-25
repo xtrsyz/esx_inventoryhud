@@ -93,16 +93,40 @@ function setPlayerInventoryData()
                 end
             end
 
-            if inventory ~= nil then
-                for key, value in pairs(inventory) do
-                    if inventory[key].count <= 0 then
-                        inventory[key] = nil
-                    else
-                        inventory[key].type = "item_standard"
-                        table.insert(items, inventory[key])
-                    end
-                end
-            end
+			if inventory ~= nil then
+				for key, value in pairs(inventory) do
+					if value.count <= 0 then
+						value = nil
+					else
+						local total = value.count                            
+						value.type = value.type or "item_standard"
+
+						if value.batch then
+							for batch, item in pairs(value.batch) do
+								local newData = copyTable(value)
+								newData.count = item.count
+								newData.info = item.info
+								newData.batch = batch
+								total = total - item.count
+								if item.info.lifetime then
+									local remaintime = item.info.expiredtime - data.serverTime
+									local quality = math.floor(remaintime / item.info.lifetime * 100)
+									newData.info.quality = quality
+								end
+								table.insert(items, newData)
+							end
+
+							if total > 0 then
+								value.count = total
+								value.batch = false
+								table.insert(items, value)
+							end
+						else
+							table.insert(items, value)
+						end
+					end
+				end
+			end
 
             if Config.IncludeWeapons and weapons ~= nil then
                 for key, value in pairs(weapons) do
@@ -159,20 +183,23 @@ RegisterNUICallback(
             return
         end
 
-        if type(data.number) == "number" and math.floor(data.number) == data.number then
-            local count = tonumber(data.number)
-
-            if data.item.type == "item_weapon" then
-                count = data.item.count
-            end
-
-            TriggerServerEvent("esx_inventoryhud:tradePlayerItem", GetPlayerServerId(PlayerId()), targetPlayer, data.item.type, data.item.name, count)
-        end
-
-        Wait(250)
-        refreshPlayerInventory()
-        loadPlayerInventory()
-
+		local closestPlayer, closestDistance = ESX.Game.GetClosestPlayer()
+		if closestPlayer == -1 or closestDistance > 1.0 then
+			closeInventory()
+		else
+			if GetPlayerServerId(closestPlayer) == targetPlayer then
+				if type(data.number) == "number" and math.floor(data.number) == data.number then
+					local count = tonumber(data.number)
+					if data.item.type == "item_weapon" then
+						count = data.item.count
+					end
+					TriggerServerEvent("esx_inventoryhud:tradePlayerItem", GetPlayerServerId(PlayerId()), targetPlayer, data.item.type, data.item.name, count, data.item)
+				end
+				Wait(250)
+				refreshPlayerInventory()
+				loadPlayerInventory()
+			end
+		end
         cb("ok")
     end
 )
@@ -184,20 +211,23 @@ RegisterNUICallback(
             return
         end
 
-        if type(data.number) == "number" and math.floor(data.number) == data.number then
-            local count = tonumber(data.number)
-
-            if data.item.type == "item_weapon" then
-                count = data.item.count
-            end
-
-            TriggerServerEvent("esx_inventoryhud:tradePlayerItem", targetPlayer, GetPlayerServerId(PlayerId()), data.item.type, data.item.name, count)
-        end
-
-        Wait(250)
-        refreshPlayerInventory()
-        loadPlayerInventory()
-
-        cb("ok")
+		local closestPlayer, closestDistance = ESX.Game.GetClosestPlayer()
+		if closestPlayer == -1 or closestDistance > 1.0 then
+			closeInventory()
+		else
+			if GetPlayerServerId(closestPlayer) == targetPlayer then
+				if type(data.number) == "number" and math.floor(data.number) == data.number then
+					local count = tonumber(data.number)
+					if data.item.type == "item_weapon" then
+						count = data.item.count
+					end
+					TriggerServerEvent("esx_inventoryhud:tradePlayerItem", targetPlayer, GetPlayerServerId(PlayerId()), data.item.type, data.item.name, count, data.item)
+				end
+				Wait(250)
+				refreshPlayerInventory()
+				loadPlayerInventory()
+			end
+		end
+		cb("ok")
     end
 )

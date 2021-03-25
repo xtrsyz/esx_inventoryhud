@@ -1,5 +1,6 @@
 Config = {}
 Config.Locale = "en"
+Config.HidePlayerName = false -- Hide player name?
 Config.IncludeCash = false -- Include cash in inventory?
 Config.IncludeWeapons = true -- Include weapons in inventory?
 Config.IncludeAccounts = true -- Include accounts (bank, black money, ...)?

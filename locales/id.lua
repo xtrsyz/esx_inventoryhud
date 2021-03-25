@@ -1,0 +1,21 @@
+Locales["id"] = {
+	["cash"] = "Uang",
+	["black_money"] = "Uang Haram",
+	["player_nearby"] = "Dia telah menghilang!",
+	["players_nearby"] = "Tidak ada orang di sekitar!",
+	["openinv_help"] = "Buka barang orang",
+	["openinv_id"] = "ID Pemain",
+	["no_permissions"] = "Gak boleh bro!",
+	["no_player"] = "Tidak ada orang dengan ID tersebut!",
+	["player_inventory"] = "Barang Orang",
+	["store"] = "Simpan",
+	["not_enough_space"] = "Gak muat bro!",
+	["not_enough_money"] = "Yah miskin gak punya duit!",
+	["already_have_weapon"] = "Sudah memiliki senjata!",
+	["bought"] = "Membeli %sx %s seharga $%s",
+	["bad_amount"] = "Salah jumlah!",
+	["took_from_storage"] = "Mengambil %sx %s",
+	["took_not_enough"] = "Gak muat bro!",
+	["someone"] = "Seseorang",
+	["put_into_storage"] = "Menyimpan %sx %s"
+}

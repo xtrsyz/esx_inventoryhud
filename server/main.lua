@@ -36,7 +36,7 @@ end)
 RegisterServerEvent("esx_inventoryhud:tradePlayerItem")
 AddEventHandler(
 	"esx_inventoryhud:tradePlayerItem",
-	function(from, target, type, itemName, itemCount)
+	function(from, target, type, itemName, itemCount, item)
 		local _source = from
 
 		local sourceXPlayer = ESX.GetPlayerFromId(_source)
@@ -49,8 +49,9 @@ AddEventHandler(
 			if itemCount > 0 and sourceItem.count >= itemCount then
 				if targetItem.limit ~= -1 and (targetItem.count + itemCount) > targetItem.limit then
 				else
-					sourceXPlayer.removeInventoryItem(itemName, itemCount)
-					targetXPlayer.addInventoryItem(itemName, itemCount)
+					local itemBatch = item.info or false
+					sourceXPlayer.removeInventoryItem(itemName, itemCount, item)
+					targetXPlayer.addInventoryItem(itemName, itemCount, itemBatch)
 				end
 			end
 		elseif type == "item_money" then

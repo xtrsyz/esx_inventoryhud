@@ -16,5 +16,6 @@ Locales["en"] = {
 	["bad_amount"] = "Wrong amount!",
 	["took_from_storage"] = "You took %sx %s",
 	["took_not_enough"] = "There is not enough in storage!",
+	["someone"] = "Someone",
 	["put_into_storage"] = "You have put %sx %s into the storage"
 }

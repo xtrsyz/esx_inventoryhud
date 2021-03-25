@@ -1,7 +1,7 @@
 isInInventory = false
 ESX = nil
 local fastSlot = {}
-local fastControl = {157,158,160,164,166}
+local fastControl = {157,158,160,164,165}
 
 function copyTable(data)
     local newTable = {}
@@ -36,7 +36,7 @@ Citizen.CreateThread(
     function()
         while true do
             Citizen.Wait(0)
-            if IsControlJustReleased(0, Config.OpenControl) and IsInputDisabled(0) then
+			if IsDisabledControlJustReleased(0, Config.OpenControl) and IsInputDisabled(0) then
                 openInventory()
             end
         end
@@ -104,7 +104,7 @@ RegisterNUICallback(
                 table.insert(
                     elements,
                     {
-                        label = ShowPlayerName(players[i]),
+						label = Config.HidePlayerName and _U("someone") or ShowPlayerName(players[i]),
                         player = GetPlayerServerId(players[i])
                     }
                 )
@@ -282,10 +282,9 @@ function loadPlayerInventory()
                         value = nil
                     else
                         local total = value.count                            
-                        value.type = "item_standard"
+						value.type = value.type or "item_standard"
 
                         if value.batch then
-							print('batch:'..json.encode(value))
                             for batch, item in pairs(value.batch) do
                                 local found = false
                                 total = total - item.count
@@ -294,8 +293,12 @@ function loadPlayerInventory()
                                 newData.count = item.count
                                 newData.info = item.info
                                 newData.batch = batch
-                                
-                                
+								if item.info.lifetime then
+									local remaintime = item.info.expiredtime - data.serverTime
+									local quality = math.floor(remaintime / item.info.lifetime * 100)
+									newData.info.quality = quality
+								end
+
                                 for slot, weapon in pairs(fastSlot) do
                                     if weapon.name == value.name and weapon.batch == batch then
                                         newData.slot = slot
@@ -308,7 +311,6 @@ function loadPlayerInventory()
                                     table.insert(items, newData)
                                 end
                             end
-							print('sisa:'..total)
                             if total > 0 then
                                 value.count = total
                                 value.batch = false
@@ -326,8 +328,7 @@ function loadPlayerInventory()
                                 end
                             end
                         else
-							print('nobatch:'..json.encode(value))
-                            value.type = "item_standard"
+							value.type = value.type or "item_standard"
                             local found = false
                             for slot, weapon in pairs(fastSlot) do
                                 if weapon.name == value.name and not weapon.batch then
@@ -354,6 +355,7 @@ function loadPlayerInventory()
                         local found = false
                         for slot, weapon in pairs(fastSlot) do
                             if weapon.name == weapons[key].name then
+								weapons[key].info = {batch = weapons[key].serial, quality = weapons[key].quality, serial = weapons[key].serial, count = weapons[key].ammo, components = weapons[key].components, tintIndex = weapons[key].tintIndex}
                                 table.insert(
                                     fastItems,
                                     {
@@ -362,8 +364,9 @@ function loadPlayerInventory()
                                         limit = -1,
                                         type = "item_weapon",
                                         name = weapons[key].name,
+										info = weapons[key].info,
                                         usable = false,
-                                        rare = false,
+										rare = false,                                        
                                         canRemove = true,
                                         slot = slot
                                     }
@@ -374,18 +377,20 @@ function loadPlayerInventory()
                         end
 
                         if found == false then
+							weapons[key].info = {batch = weapons[key].serial, quality = weapons[key].quality, serial = weapons[key].serial, count = weapons[key].ammo, components = weapons[key].components, tintIndex = weapons[key].tintIndex}
                             table.insert(
                                 items,
-                                {
-                                    label = weapons[key].label,
-                                    count = weapons[key].ammo,
-                                    limit = -1,
-                                    type = "item_weapon",
-                                    name = weapons[key].name,
-                                    usable = false,
-                                    rare = false,
-                                    canRemove = true
-                                }
+								{
+									label = weapons[key].label,
+									count = weapons[key].ammo,
+									limit = -1,
+									type = "item_weapon",
+									name = weapons[key].name,
+									info = weapons[key].info,
+									usable = false,
+									rare = false,
+									canRemove = true
+								}
                             )
                         end
                     end
@@ -465,6 +470,10 @@ Citizen.CreateThread(function ()
         HideHudComponentThisFrame(20)
         BlockWeaponWheelThisFrame()
         DisableControlAction(0, 37,true)
+		DisableControlAction(0, Config.OpenControl,true)
+		for key, control in pairs(fastControl) do
+			DisableControlAction(0, control,true)
+		end
     end
 end)
 
@@ -491,7 +500,7 @@ RegisterNUICallback("PutIntoFast", function(data, cb)
     if data.item.slot ~= nil then
         fastSlot[data.item.slot] = nil
     end
-        fastSlot[data.slot] = {name = data.item.name, type = data.item.type, batch = data.item.batch}
+		fastSlot[data.slot] = data.item
         TriggerServerEvent("esx_inventoryhud:changeFastItem", fastSlot)
         loadPlayerInventory()
         cb("ok")
@@ -505,7 +514,9 @@ RegisterNUICallback("TakeFromFast", function(data, cb)
 end)
 
 Citizen.CreateThread(function()
-        while true do
+	while true do
+		Citizen.Wait(200)
+		while IsControlPressed(0, 21) do
             Citizen.Wait(0)
             for key, control in pairs(fastControl) do
                 if IsDisabledControlJustReleased(1, control) then
@@ -517,12 +528,13 @@ Citizen.CreateThread(function()
                                 SetCurrentPedWeapon(GetPlayerPed(-1), fastSlot[key].name,true)
                             end
                         else
-                            TriggerServerEvent("esx:useItem", fastSlot[key].name, fastSlot[key].batch)
+							TriggerServerEvent("esx:useItem", fastSlot[key].name, fastSlot[key])
                         end
                     end
                 end
             end
         end
+	end
 end)
 
 AddEventHandler('onResourceStop', function(resource)

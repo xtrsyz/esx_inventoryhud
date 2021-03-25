@@ -26,8 +26,6 @@ window.addEventListener("message", function (event) {
     } else if (event.data.action == "setType") {
         type = event.data.type;
     } else if (event.data.action == "setItems") {
-        itemQList = event.data.QualityList
-        itemSList = event.data.SerialList
         inventorySetup(event.data.itemList, event.data.fastItems);
 
         $('.item').draggable({
@@ -153,11 +151,17 @@ window.addEventListener("message", function (event) {
         $("#player-inv-id").html(event.data.id);
         $("#player-used").html(event.data.used);
         $("#player-max").html(event.data.max);
+        var barweight = event.data.used/event.data.max*100;
+        $('#player-left-data').append('<div class="barweight"></div>');
+        $('#player-left-data > .barweight').css('width', barweight + '%');
     } else if (event.data.action == "setInfoOther") {
         $("#other-inv-label").html(event.data.label);
         $("#other-inv-id").html(event.data.id);
         $("#other-used").html(event.data.used);
         $("#other-max").html(event.data.max);
+        var barweight = event.data.used/event.data.max*100;
+        $('#other-right-data').append('<div class="barweight"></div>');
+        $('#other-right-data > .barweight').css('width', barweight + '%');
     } else if (event.data.action == "nearPlayers") {
         $("#nearPlayers").html("");
 
@@ -226,6 +230,45 @@ function fastSlotSetup(fastItems) {
         $('#itemFast-' + item.slot).html('<div class="keybind">' + item.slot + '</div><div class="item-count">' + count + '</div> <div class="item-name">' + item.label + '</div>');
         $('#itemFast-' + item.slot).data('item', item);
         $('#itemFast-' + item.slot).data('inventory', "fast");
+
+        var qualityI = GetItemQualityList(item)
+        if (qualityI) {
+            $('#itemFast-' + item.slot).append('<div class="item-quality"></div>');
+            $('#itemFast-' + item.slot + ' > .item-quality').css('width', qualityI + '%');
+            if (qualityI > 99) {
+                // $('#itemFast-' + item.slot + ' > .item-quality').css('width', 120)
+                $('#itemFast-' + item.slot + ' > .item-quality').css('background-color', 'rgba(111,195,111,0.9)'); // yeşil
+                $('#itemFast-' + item.slot + ' > .item-quality').html("PERFECT")
+            } else if (qualityI < 100 && qualityI > 80) {
+                // $('#itemFast-' + item.slot + ' > .item-quality').css('width', 100)
+                $('#itemFast-' + item.slot + ' > .item-quality').css('background-color', 'rgba(111,195,111,0.9)'); // yeşil
+            } else if (qualityI < 81 && qualityI > 70) {
+                // $('#itemFast-' + item.slot + ' > .item-quality').css('width', 90);
+                $('#itemFast-' + item.slot + ' > .item-quality').css('background-color', 'rgba(111,195,111,0.9)'); // Sarı
+            } else if (qualityI < 71 && qualityI > 60) {
+                // $('#itemFast-' + item.slot + ' > .item-quality').css('width', 80);
+                $('#itemFast-' + item.slot + ' > .item-quality').css('background-color', 'rgb(218, 188, 21)'); // Sarı
+            } else if (qualityI < 61 && qualityI > 50) {
+                // $('#itemFast-' + item.slot + ' > .item-quality').css('width', 70);
+                $('#itemFast-' + item.slot + ' > .item-quality').css('background-color', 'rgb(218, 188, 21)'); // sarı
+            } else if (qualityI < 51 && qualityI > 40) {
+                // $('#itemFast-' + item.slot + ' > .item-quality').css('width', 60);
+                $('#itemFast-' + item.slot + ' > .item-quality').css('background-color', 'orange');
+            } else if (qualityI < 41 && qualityI > 30) {
+                // $('#itemFast-' + item.slot + ' > .item-quality').css('width', 50);
+                $('#itemFast-' + item.slot + ' > .item-quality').css('background-color', 'orange');
+            } else if (qualityI < 31 && qualityI > 20) {
+                // $('#itemFast-' + item.slot + ' > .item-quality').css('width', 40);
+                $('#itemFast-' + item.slot + ' > .item-quality').css('background-color', 'orange');
+            } else if (qualityI < 21 && qualityI > 10) {
+                // $('#itemFast-' + item.slot + ' > .item-quality').css('width', 20);
+                $('#itemFast-' + item.slot + ' > .item-quality').css('background-color', 'rgba(151,44,44,0.9)');
+            } else if (qualityI >= 0) {
+                $('#itemFast-' + item.slot + ' > .item-quality').css('width', '100%');
+                $('#itemFast-' + item.slot + ' > .item-quality').css('background-color', 'rgba(151,44,44,0.9)'); // kırmızı
+                $('#itemFast-' + item.slot + ' > .item-quality').html("BROKEN");
+            }
+        }
     });
     makeDroppables();
 }
@@ -262,9 +305,43 @@ function inventorySetup(items, fastItems) {
         $('#item-' + index).data('item', item);
         $('#item-' + index).data('inventory', "main");
         var qualityI = GetItemQualityList(item)
-        if (qualityI !== undefined) {
+        if (qualityI) {
             $('#item-' + index).append('<div class="item-quality"></div>');
-        }        
+            $('#item-' + index + ' > .item-quality').css('width', qualityI + '%');
+            if (qualityI > 99) {
+                // $('#item-' + index + ' > .item-quality').css('width', 120)
+                $('#item-' + index + ' > .item-quality').css('background-color', 'rgba(111,195,111,0.9)'); // yeşil
+                $('#item-' + index + ' > .item-quality').html("PERFECT")
+            } else if (qualityI < 100 && qualityI > 80) {
+                // $('#item-' + index + ' > .item-quality').css('width', 100)
+                $('#item-' + index + ' > .item-quality').css('background-color', 'rgba(111,195,111,0.9)'); // yeşil
+            } else if (qualityI < 81 && qualityI > 70) {
+                // $('#item-' + index + ' > .item-quality').css('width', 90);
+                $('#item-' + index + ' > .item-quality').css('background-color', 'rgba(111,195,111,0.9)'); // Sarı
+            } else if (qualityI < 71 && qualityI > 60) {
+                // $('#item-' + index + ' > .item-quality').css('width', 80);
+                $('#item-' + index + ' > .item-quality').css('background-color', 'rgb(218, 188, 21)'); // Sarı
+            } else if (qualityI < 61 && qualityI > 50) {
+                // $('#item-' + index + ' > .item-quality').css('width', 70);
+                $('#item-' + index + ' > .item-quality').css('background-color', 'rgb(218, 188, 21)'); // sarı
+            } else if (qualityI < 51 && qualityI > 40) {
+                // $('#item-' + index + ' > .item-quality').css('width', 60);
+                $('#item-' + index + ' > .item-quality').css('background-color', 'orange');
+            } else if (qualityI < 41 && qualityI > 30) {
+                // $('#item-' + index + ' > .item-quality').css('width', 50);
+                $('#item-' + index + ' > .item-quality').css('background-color', 'orange');
+            } else if (qualityI < 31 && qualityI > 20) {
+                // $('#item-' + index + ' > .item-quality').css('width', 40);
+                $('#item-' + index + ' > .item-quality').css('background-color', 'orange');
+            } else if (qualityI < 21 && qualityI > 10) {
+                // $('#item-' + index + ' > .item-quality').css('width', 20);
+                $('#item-' + index + ' > .item-quality').css('background-color', 'rgba(151,44,44,0.9)');
+            } else if (qualityI >= 0) {
+                $('#item-' + index + ' > .item-quality').css('width', '100%');
+                $('#item-' + index + ' > .item-quality').css('background-color', 'rgba(151,44,44,0.9)'); // kırmızı
+                $('#item-' + index + ' > .item-quality').html("BROKEN");
+            }
+        }
     });
     fastSlotSetup(fastItems);
 }
@@ -288,6 +365,44 @@ function secondInventorySetup(items) {
             '<div class="item-count">' + count + '</div> <div class="item-name">' + item.label + '</div> </div></div>');
         $('#itemOther-' + index).data('item', item);
         $('#itemOther-' + index).data('inventory', "second");
+        var qualityI = GetItemQualityList(item)
+        if (qualityI) {
+            $('#itemOther-' + index).append('<div class="item-quality"></div>');
+            $('#itemOther-' + index + ' > .item-quality').css('width', qualityI + '%');
+            if (qualityI > 99) {
+                // $('#itemOther-' + index + ' > .item-quality').css('width', 120)
+                $('#itemOther-' + index + ' > .item-quality').css('background-color', 'rgba(111,195,111,0.9)'); // yeşil
+                $('#itemOther-' + index + ' > .item-quality').html("PERFECT")
+            } else if (qualityI < 100 && qualityI > 80) {
+                // $('#itemOther-' + index + ' > .item-quality').css('width', 100)
+                $('#itemOther-' + index + ' > .item-quality').css('background-color', 'rgba(111,195,111,0.9)'); // yeşil
+            } else if (qualityI < 81 && qualityI > 70) {
+                // $('#itemOther-' + index + ' > .item-quality').css('width', 90);
+                $('#itemOther-' + index + ' > .item-quality').css('background-color', 'rgba(111,195,111,0.9)'); // Sarı
+            } else if (qualityI < 71 && qualityI > 60) {
+                // $('#itemOther-' + index + ' > .item-quality').css('width', 80);
+                $('#itemOther-' + index + ' > .item-quality').css('background-color', 'rgb(218, 188, 21)'); // Sarı
+            } else if (qualityI < 61 && qualityI > 50) {
+                // $('#itemOther-' + index + ' > .item-quality').css('width', 70);
+                $('#itemOther-' + index + ' > .item-quality').css('background-color', 'rgb(218, 188, 21)'); // sarı
+            } else if (qualityI < 51 && qualityI > 40) {
+                // $('#itemOther-' + index + ' > .item-quality').css('width', 60);
+                $('#itemOther-' + index + ' > .item-quality').css('background-color', 'orange');
+            } else if (qualityI < 41 && qualityI > 30) {
+                // $('#itemOther-' + index + ' > .item-quality').css('width', 50);
+                $('#itemOther-' + index + ' > .item-quality').css('background-color', 'orange');
+            } else if (qualityI < 31 && qualityI > 20) {
+                // $('#itemOther-' + index + ' > .item-quality').css('width', 40);
+                $('#itemOther-' + index + ' > .item-quality').css('background-color', 'orange');
+            } else if (qualityI < 21 && qualityI > 10) {
+                // $('#itemOther-' + index + ' > .item-quality').css('width', 20);
+                $('#itemOther-' + index + ' > .item-quality').css('background-color', 'rgba(151,44,44,0.9)');
+            } else if (qualityI >= 0) {
+                $('#itemOther-' + index + ' > .item-quality').css('width', '100%');
+                $('#itemOther-' + index + ' > .item-quality').css('background-color', 'rgba(151,44,44,0.9)'); // kırmızı
+                $('#itemOther-' + index + ' > .item-quality').html("BROKEN");
+            }
+        }
     });
 }
 

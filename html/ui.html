@@ -2,7 +2,7 @@
 <html>
 
 <head>
-    <title>ESX INVENTORY HUD BY GiGNe</title>
+    <title>ESX INVENTORY HUD BY GiGNe & Axon</title>
     <link href="https://fonts.googleapis.com/css?family=Signika" rel="stylesheet">
     <link rel="stylesheet" type="text/css" href="css/ui.css">
     <link rel="stylesheet" type="text/css" href="css/jquery-ui.css">
@@ -15,7 +15,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
     <script src="js/inventory.js"></script>
     <script>
-        $(function () {
+        $(function() {
             $("#dialog").dialog({
                 autoOpen: false,
                 clickOutside: true
@@ -23,16 +23,15 @@
         });
     </script>
 
-    <div class="Information">
-        <div class="info-name"></div>
-        <div class="info-uniqueness"></div>
-        <div class="info-weight"></div>
-        <hr />
-        <div class="info-desc"></div>
-        <div class="info-meta"></div>
-    </div>
-    
     <div class="ui">
+        <div class="Information">
+            <div class="info-name"></div>
+            <div class="info-uniqueness"></div>
+            <div class="info-weight"></div>
+            <hr />
+            <div class="info-desc"></div>
+            <div class="info-meta"></div>
+        </div>
         <div class="inventory">
             <div class="inventory-wrapper">
                 <div class="left-data" id="player-left-data">
@@ -43,6 +42,7 @@
                         <span id="player-max">10</span>
                     </div>
                     <div id="player-inv-id" class="inv-id">inv-000</div>
+                    <div id="player-weight" class="inv-weight"><div class="barweight"></div></div>
                 </div>
                 <div id="playerInventoryFastItems">
                 </div>
@@ -51,6 +51,7 @@
             </div>
             <div id="controls">
                 <div class="controls-div">
+                    <div class="control-logo"></div>
                     <div id="weight"></div> 
                     <input type="number" class="control" id="count" value="1">
                     <div class="control" id="use"></div>
@@ -67,6 +68,7 @@
                         <span>/</span>
                         <span id="other-max">10</span>
                     </div>
+                    <div id="other-weight" class="inv-weight"><div class="barweight"></div></div>
                 </div>
                 <div id="otherInventory">
                     <div id="noSecondInventoryMessage"></div>
@@ -83,7 +85,7 @@
 </body>
 
 <script>
-    $(document).ready(function () {
+    $(document).ready(function() {
         $("#use").html(invLocale.useItem);
         $("#give").html(invLocale.giveItem);
         $("#drop").html(invLocale.dropItem);

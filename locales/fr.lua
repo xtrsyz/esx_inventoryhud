@@ -15,6 +15,7 @@ Locales["fr"] = {
 	["bought"] = "You bought %sx %s for $%s",
 	["bad_amount"] = "Wrong amount!",
 	["took_from_storage"] = "You took %sx %s",
-	["took_not_enough"] = "There is not enough in storage!",
+	["took_not_enough"] = "Il n'y a pas assez de stockage!",
+	["someone"] = "La personne",
 	["put_into_storage"] = "You have put %sx %s into the storage"
 }

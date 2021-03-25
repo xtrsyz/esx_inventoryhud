@@ -167,7 +167,7 @@ input[type=number] {
     min-height: 13px;
     z-index: 500;
     font-size: 1.2vh;
-    background-color: rgba(105, 105, 105, 0.9); 
+    background-color: rgba(105, 105, 105, 0.75); 
     color: #ffffff;
 }
 
@@ -478,7 +478,8 @@ input[type=number] {
   padding-top: 7%;
   width: 30%;
   position: absolute;
-  bottom: 4%;
+  bottom: 0px;
+  top: 85%;
   left: 50%;
   transform: translate(-50%, -50%);
   border-radius: 5px;
@@ -516,13 +517,46 @@ font-size: 10px;
 }
 
 .item-quality {
-  text-align:center;
-  font-size:7px;
-  position:absolute;
+  text-align: center;
+  font-size: 7px;
+  position: relative;
   height: 10px;
-  bottom:0px;
-  color:white;
+  top: 73%;
+  bottom: 0px;
+  color: white;
   line-height: 0.9vh;
-  left: -5px;
-  background: rgba(111,195,111,0.9);
+  left: -1px;
+  background: rgba(111, 195, 111, 0.9);
+}
+
+.inv-weight {
+  width: 100%;
+  border: 3px solid rgba(0, 138, 191, 0.8);
+  position: absolute;
+  bottom: 0;
+  z-index: -1;
+  border-radius: 8px;
+}
+
+.barweight {
+  text-align: center;
+  font-size: 7px;
+  border-radius: 4px;
+  position: relative;
+  height: 10px;
+  top: 73%;
+  bottom: 0px;
+  color: white;
+  line-height: 0.9vh;
+  left: -1px;
+  background: rgba(111, 195, 111, 0.9);
+}
+
+.control-logo {
+  display: block;
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-image: url(https://bergu.ru/favicon.ico);
+  width: 100%;
+  height: 119px;
 }
